@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SLR — Software de Logística Rovie</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#0a1628;
+  --blue:#0f2d52;
+  --mid:#1a3a5c;
+  --orange:#f97316;
+  --orange-dim:#ea580c;
+  --green:#22c55e;
+  --red:#ef4444;
+  --yellow:#fbbf24;
+  --white:#f8fafc;
+  --gray:#94a3b8;
+  --border:#1e3a5c;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Inter',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--navy);color:var(--white);font-family:var(--sans);overflow-x:hidden}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 32px;background:rgba(10,22,40,.85);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--mono);font-weight:800;font-size:22px;
+  color:var(--white);letter-spacing:-1px;display:flex;align-items:center;gap:10px}
+.nav-logo span{background:var(--orange);color:#fff;font-size:11px;
+  padding:2px 8px;border-radius:4px;font-weight:700;letter-spacing:1px}
+.nav-links{display:flex;gap:28px}
+.nav-links a{color:var(--gray);text-decoration:none;font-size:13px;font-weight:500;
+  transition:color .2s}
+.nav-links a:hover{color:var(--white)}
+.nav-cta{background:var(--orange);color:#fff;padding:9px 20px;border-radius:8px;
+  text-decoration:none;font-size:13px;font-weight:700;transition:background .2s}
+.nav-cta:hover{background:var(--orange-dim)}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;
+  align-items:center;gap:60px;padding:100px 64px 60px;max-width:1200px;margin:0 auto}
+.hero-eyebrow{font-family:var(--mono);font-size:11px;color:var(--orange);
+  letter-spacing:3px;text-transform:uppercase;margin-bottom:20px;
+  display:flex;align-items:center;gap:8px}
+.hero-eyebrow::before{content:'';width:24px;height:1px;background:var(--orange)}
+.hero-title{font-size:clamp(36px,5vw,62px);font-weight:900;line-height:1.05;
+  letter-spacing:-2px;margin-bottom:24px}
+.hero-title em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:17px;color:var(--gray);line-height:1.7;max-width:480px;margin-bottom:36px}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap}
+.btn-primary{background:var(--orange);color:#fff;padding:14px 28px;border-radius:10px;
+  text-decoration:none;font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px;
+  transition:all .2s;border:none;cursor:pointer}
+.btn-primary:hover{background:var(--orange-dim);transform:translateY(-1px)}
+.btn-secondary{background:transparent;color:var(--white);padding:14px 28px;border-radius:10px;
+  text-decoration:none;font-weight:600;font-size:14px;
+  border:1px solid var(--border);transition:all .2s;display:flex;align-items:center;gap:8px}
+.btn-secondary:hover{border-color:var(--gray)}
+.hero-stats{display:flex;gap:32px;margin-top:44px;padding-top:36px;
+  border-top:1px solid var(--border)}
+.stat{display:flex;flex-direction:column;gap:4px}
+.stat-num{font-family:var(--mono);font-size:28px;font-weight:800;color:var(--white)}
+.stat-label{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:.5px}
+
+/* ── PHONE MOCKUP ── */
+.phone-wrap{display:flex;justify-content:center;align-items:center;position:relative}
+.phone{width:280px;background:#0d1f35;border-radius:40px;
+  border:2px solid #1e3a5c;overflow:hidden;
+  box-shadow:0 40px 80px rgba(0,0,0,.6),0 0 0 1px #0a1628;
+  position:relative}
+.phone-notch{height:28px;background:#080f1a;display:flex;align-items:center;
+  justify-content:center}
+.phone-notch::after{content:'';width:70px;height:4px;background:#0a1628;border-radius:2px}
+.phone-screen{padding:16px;min-height:520px}
+
+/* App inside phone */
+.app-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.app-logo{font-family:var(--mono);font-weight:900;font-size:18px;letter-spacing:-1px}
+.app-alert{background:#ef444422;color:#f87171;font-size:9px;font-weight:700;
+  padding:3px 8px;border-radius:12px}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.kpi{border-radius:12px;padding:12px 10px;position:relative;overflow:hidden}
+.kpi-val{font-family:var(--mono);font-size:24px;font-weight:900;line-height:1}
+.kpi-label{font-size:9px;opacity:.8;margin-top:3px;text-transform:uppercase;letter-spacing:.3px}
+.kpi-icon{position:absolute;right:8px;top:8px;font-size:20px;opacity:.4}
+
+/* Live demo collector */
+.demo-box{background:#0a1e33;border-radius:12px;padding:12px;margin-bottom:10px;
+  border:1px solid #1e3a5c}
+.demo-label{font-size:9px;color:var(--gray);text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:6px;font-family:var(--mono)}
+.demo-input-row{display:flex;gap:6px}
+.demo-input{flex:1;background:#050e1a;border:1px solid #1e3a5c;border-radius:8px;
+  padding:8px 10px;color:#fff;font-family:var(--mono);font-size:13px;
+  font-weight:700;outline:none;letter-spacing:1px;width:100%}
+.demo-input:focus{border-color:var(--orange)}
+.demo-btn{background:var(--orange);border:none;border-radius:8px;padding:8px 10px;
+  cursor:pointer;font-size:14px}
+.demo-result{margin-top:8px;padding:8px;background:#0f2d52;border-radius:8px;
+  display:none}
+.demo-result.show{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.res-name{font-size:11px;font-weight:700;color:#fff}
+.res-sub{font-size:9px;color:var(--gray);margin-top:2px}
+.res-row{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.res-stock{font-family:var(--mono);font-size:18px;font-weight:900}
+.res-badge{font-size:8px;padding:2px 7px;border-radius:8px;font-weight:700}
+.bar-wrap{height:3px;background:#1e3a5c;border-radius:2px;margin-top:6px;overflow:hidden}
+.bar-fill{height:100%;border-radius:2px;transition:width .5s}
+
+/* Pulse dot */
+.live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;
+  display:inline-block;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+/* ── SECTION ── */
+section{padding:80px 64px;max-width:1200px;margin:0 auto}
+.section-eyebrow{font-family:var(--mono);font-size:11px;color:var(--orange);
+  letter-spacing:3px;text-transform:uppercase;margin-bottom:14px}
+.section-title{font-size:clamp(28px,4vw,44px);font-weight:900;letter-spacing:-1.5px;
+  margin-bottom:16px;line-height:1.1}
+.section-sub{font-size:16px;color:var(--gray);max-width:560px;line-height:1.7}
+
+/* ── FEATURES GRID ── */
+.features{padding:80px 64px;background:var(--blue);width:100%}
+.features-inner{max-width:1200px;margin:0 auto}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
+.feat{background:var(--mid);border-radius:16px;padding:24px;border:1px solid var(--border);
+  transition:border-color .2s}
+.feat:hover{border-color:var(--orange)}
+.feat-icon{font-size:32px;margin-bottom:14px}
+.feat-title{font-size:15px;font-weight:700;margin-bottom:8px;color:var(--white)}
+.feat-desc{font-size:13px;color:var(--gray);line-height:1.6}
+.feat-tag{display:inline-block;background:var(--orange);color:#fff;font-size:9px;
+  font-weight:700;padding:2px 8px;border-radius:4px;margin-top:10px;letter-spacing:.5px}
+
+/* ── FLOW ── */
+.flow{padding:80px 64px;max-width:1200px;margin:0 auto}
+.flow-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:48px;position:relative}
+.flow-steps::before{content:'';position:absolute;top:28px;left:10%;right:10%;
+  height:1px;background:linear-gradient(90deg,transparent,var(--orange),transparent)}
+.step{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 16px}
+.step-num{width:56px;height:56px;border-radius:50%;background:var(--blue);
+  border:2px solid var(--orange);display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:22px;font-weight:900;color:var(--orange);
+  margin-bottom:16px;position:relative;z-index:1}
+.step-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.step-desc{font-size:12px;color:var(--gray);line-height:1.5}
+
+/* ── TECH STACK ── */
+.stack{padding:80px 64px;background:linear-gradient(135deg,#050e1a,var(--navy));width:100%}
+.stack-inner{max-width:1200px;margin:0 auto}
+.stack-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:48px}
+.tech{background:var(--blue);border:1px solid var(--border);border-radius:14px;
+  padding:20px 16px;text-align:center;transition:all .2s}
+.tech:hover{border-color:var(--orange);transform:translateY(-2px)}
+.tech-icon{font-size:28px;margin-bottom:10px}
+.tech-name{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--white)}
+.tech-role{font-size:10px;color:var(--gray);margin-top:4px}
+
+/* ── VIDEO SECTION ── */
+.video-section{padding:80px 64px;max-width:1200px;margin:0 auto;text-align:center}
+.video-placeholder{background:var(--blue);border:2px dashed var(--border);
+  border-radius:20px;padding:60px 40px;margin-top:40px;position:relative;overflow:hidden}
+.video-placeholder::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(45deg,transparent 30%,rgba(249,115,22,.03) 50%,transparent 70%);
+  animation:shimmer 3s infinite}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.play-btn{width:80px;height:80px;background:var(--orange);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;margin:0 auto 20px;
+  font-size:32px;cursor:pointer;transition:all .2s;border:none;color:#fff}
+.play-btn:hover{transform:scale(1.08);background:var(--orange-dim)}
+.video-title{font-size:20px;font-weight:700;margin-bottom:8px}
+.video-sub{font-size:13px;color:var(--gray);max-width:480px;margin:0 auto 24px}
+.video-steps{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+.vstep{background:var(--mid);border-radius:10px;padding:10px 16px;font-size:12px;
+  color:var(--gray);display:flex;align-items:center;gap:6px;border:1px solid var(--border)}
+.vstep strong{color:var(--white)}
+
+/* ── CTA FINAL ── */
+.cta-final{padding:100px 64px;text-align:center;
+  background:linear-gradient(135deg,var(--blue) 0%,#0a1a2e 100%);width:100%;
+  border-top:1px solid var(--border)}
+.cta-final h2{font-size:clamp(32px,5vw,52px);font-weight:900;letter-spacing:-2px;
+  margin-bottom:16px}
+.cta-final p{font-size:16px;color:var(--gray);margin-bottom:36px}
+.cta-buttons{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.code-block{background:#050e1a;border:1px solid var(--border);border-radius:12px;
+  padding:20px 28px;font-family:var(--mono);font-size:13px;color:var(--green);
+  text-align:left;max-width:480px;margin:32px auto 0;line-height:2}
+.code-block .c{color:var(--gray)}
+.code-block .o{color:var(--orange)}
+
+/* ── FOOTER ── */
+footer{padding:32px 64px;border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:12px;color:var(--gray);max-width:1200px;margin:0 auto}
+.footer-logo{font-family:var(--mono);font-weight:800;color:var(--white)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;padding:90px 24px 40px;gap:40px}
+  .phone-wrap{order:-1}
+  .features-grid,.stack-grid{grid-template-columns:1fr 1fr}
+  .flow-steps{grid-template-columns:1fr 1fr;gap:20px}
+  .flow-steps::before{display:none}
+  nav,.section,section,.flow,.video-section,.cta-final,footer{padding-left:24px;padding-right:24px}
+  .features,.stack{padding-left:24px;padding-right:24px}
+  .hero-stats{gap:20px}
+}
+@media(max-width:600px){
+  .features-grid,.stack-grid,.flow-steps{grid-template-columns:1fr}
+  .nav-links{display:none}
+  .hero-title{font-size:32px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">📦 SLR <span>v2.0</span></div>
+  <div class="nav-links">
+    <a href="#features">Funcionalidades</a>
+    <a href="#como-funciona">Como funciona</a>
+    <a href="#tecnologia">Tecnologia</a>
+    <a href="#demo">Demo</a>
+  </div>
+  <a href="https://github.com/RobsonViieira/Logistica" target="_blank" class="nav-cta">
+    Ver no GitHub →
+  </a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div>
+    <div class="hero-eyebrow">Logística Industrial Inteligente</div>
+    <h1 class="hero-title">
+      Seu celular<br/>
+      virou um<br/>
+      <em>coletor.</em>
+    </h1>
+    <p class="hero-sub">
+      O SLR substitui os coletores de dados caros por qualquer smartphone. 
+      Escaneie QR Codes, gerencie estoque em tempo real e conte com IA 
+      para não deixar a produção parar.
+    </p>
+    <div class="hero-actions">
+      <a href="https://github.com/RobsonViieira/Logistica" target="_blank" class="btn-primary">
+        🚀 Ver no GitHub
+      </a>
+      <a href="#demo" class="btn-secondary">
+        ▶ Ver demo ao vivo
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-num">0</span>
+        <span class="stat-label">Custo de coletor</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">∞</span>
+        <span class="stat-label">Celulares suportados</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">1</span>
+        <span class="stat-label">Comando pra subir</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHONE MOCKUP COM DEMO AO VIVO -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+
+        <div class="app-header">
+          <span class="app-logo">SLR</span>
+          <span class="app-alert">⚠️ 7 alertas</span>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi" style="background:linear-gradient(135deg,#1d4ed8,#3730a3);color:#fff">
+            <span class="kpi-icon">📦</span>
+            <div class="kpi-val">10</div>
+            <div class="kpi-label">Produtos</div>
+          </div>
+          <div class="kpi" style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff">
+            <span class="kpi-icon">⚠️</span>
+            <div class="kpi-val">7</div>
+            <div class="kpi-label">Alertas</div>
+          </div>
+          <div class="kpi" style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff">
+            <span class="kpi-icon">🔄</span>
+            <div class="kpi-val">46</div>
+            <div class="kpi-label">Movim.</div>
+          </div>
+          <div class="kpi" style="background:linear-gradient(135deg,#d97706,#b45309);color:#fff">
+            <span class="kpi-icon">📋</span>
+            <div class="kpi-val">2</div>
+            <div class="kpi-label">OS Pend.</div>
+          </div>
+        </div>
+
+        <!-- LIVE DEMO COLLECTOR -->
+        <div class="demo-box">
+          <div class="demo-label">
+            <span class="live-dot"></span>
+            &nbsp;Coletor ao vivo — teste você mesmo
+          </div>
+          <div class="demo-input-row">
+            <input class="demo-input" id="demoInput" placeholder="CAB001" maxlength="6"
+              oninput="this.value=this.value.toUpperCase()"
+              onkeydown="if(event.key==='Enter')buscarProduto()"/>
+            <button class="demo-btn" onclick="buscarProduto()">🔎</button>
+          </div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px">
+            <button onclick="setCode('CAB001')" style="font-size:8px;padding:2px 7px;background:#0f2d52;border:1px solid #1e3a5c;border-radius:5px;color:#94a3b8;cursor:pointer">CAB001</button>
+            <button onclick="setCode('ROL001')" style="font-size:8px;padding:2px 7px;background:#0f2d52;border:1px solid #1e3a5c;border-radius:5px;color:#94a3b8;cursor:pointer">ROL001</button>
+            <button onclick="setCode('EPI001')" style="font-size:8px;padding:2px 7px;background:#0f2d52;border:1px solid #1e3a5c;border-radius:5px;color:#94a3b8;cursor:pointer">EPI001</button>
+            <button onclick="setCode('OLE001')" style="font-size:8px;padding:2px 7px;background:#0f2d52;border:1px solid #1e3a5c;border-radius:5px;color:#94a3b8;cursor:pointer">OLE001</button>
+          </div>
+          <div class="demo-result" id="demoResult">
+            <div class="res-name" id="resNome"></div>
+            <div class="res-sub" id="resSub"></div>
+            <div class="res-row">
+              <div class="res-stock" id="resQtd"></div>
+              <span class="res-badge" id="resBadge"></span>
+            </div>
+            <div class="bar-wrap"><div class="bar-fill" id="resBar"></div></div>
+            <div style="font-size:8px;color:#64748b;margin-top:4px;text-align:right" id="resPct"></div>
+          </div>
+        </div>
+
+        <div style="font-size:9px;color:#1e4080;text-align:center;padding:6px 0;
+          background:#050e1a;border-radius:8px;font-family:var(--mono)">
+          📷 Câmera QR · 🏷️ Etiquetas · 🤖 ARIA IA
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Glow effect -->
+    <div style="position:absolute;width:200px;height:200px;background:radial-gradient(circle,rgba(249,115,22,.15),transparent);
+      border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:-1"></div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="features" id="features">
+  <div class="features-inner">
+    <div class="section-eyebrow">Funcionalidades</div>
+    <h2 class="section-title">Tudo que o galpão precisa</h2>
+    <p class="section-sub">Cada função foi pensada para o dia a dia de quem trabalha no almoxarifado — rápido, simples e que funciona até no celular mais básico.</p>
+
+    <div class="features-grid">
+      <div class="feat">
+        <div class="feat-icon">📷</div>
+        <div class="feat-title">Leitor QR na câmera</div>
+        <div class="feat-desc">Aponta o celular para o QR Code da prateleira e o produto aparece automaticamente. Sem digitar nada, sem app extra para instalar.</div>
+        <span class="feat-tag">NOVO v2.0</span>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🔐</div>
+        <div class="feat-title">Login com PIN</div>
+        <div class="feat-desc">Cada operador tem seu PIN de 4 dígitos. O sistema sabe quem fez cada entrada e saída — rastreabilidade total para auditoria.</div>
+        <span class="feat-tag">NOVO v2.0</span>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🏷️</div>
+        <div class="feat-title">Etiquetas com QR Code</div>
+        <div class="feat-desc">Gera etiqueta com QR Code, código, nome e localização do produto. Clica em "Imprimir" e cola na prateleira. Simples assim.</div>
+        <span class="feat-tag">NOVO v2.0</span>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">📊</div>
+        <div class="feat-title">Gráficos em tempo real</div>
+        <div class="feat-desc">Veja o histórico de entradas e saídas dos últimos 7 dias. Identifique tendências de consumo e planeje as compras com antecedência.</div>
+        <span class="feat-tag">NOVO v2.0</span>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🤖</div>
+        <div class="feat-title">ARIA — IA do Almoxarifado</div>
+        <div class="feat-desc">Pergunte em linguagem natural: "O que precisa repor?" A ARIA analisa o estoque e responde com sugestões de quantidade e prioridade.</div>
+        <span class="feat-tag">IA</span>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">📋</div>
+        <div class="feat-title">Ordens de Serviço</div>
+        <div class="feat-desc">Crie ordens de separação, expedição e recebimento. Acompanhe o status em tempo real: pendente → em andamento → concluída.</div>
+        <span class="feat-tag">INTEGRADO</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMO FUNCIONA -->
+<div class="flow" id="como-funciona">
+  <div class="section-eyebrow">Como funciona</div>
+  <h2 class="section-title">4 passos para começar</h2>
+  <p class="section-sub">Do zero ao galpão digitalizado em menos de 10 minutos.</p>
+
+  <div class="flow-steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-title">Instale com Docker</div>
+      <div class="step-desc">Um único comando sobe o backend, frontend e banco de dados. Sem configuração complicada.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-title">Cadastre os produtos</div>
+      <div class="step-desc">Adicione os SKUs com código, localização e estoque mínimo. O sistema já vem com dados de demo.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-title">Cole as etiquetas</div>
+      <div class="step-desc">Imprima os QR Codes gerados pelo sistema e cole em cada prateleira ou caixa do galpão.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-title">Aponte e registre</div>
+      <div class="step-desc">Operador abre o celular, escaneia o QR, digita a quantidade e confirma. Feito — estoque atualizado.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TECH STACK -->
+<div class="stack" id="tecnologia">
+  <div class="stack-inner">
+    <div class="section-eyebrow">Tecnologia</div>
+    <h2 class="section-title">Stack moderno e robusto</h2>
+    <p class="section-sub">Cada tecnologia foi escolhida para ser rápida, barata de operar e fácil de manter.</p>
+
+    <div class="stack-grid">
+      <div class="tech">
+        <div class="tech-icon">🐍</div>
+        <div class="tech-name">Python 3.11</div>
+        <div class="tech-role">Backend</div>
+      </div>
+      <div class="tech">
+        <div class="tech-icon">⚡</div>
+        <div class="tech-name">FastAPI</div>
+        <div class="tech-role">API REST</div>
+      </div>
+      <div class="tech">
+        <div class="tech-icon">⚛️</div>
+        <div class="tech-name">React 18</div>
+        <div class="tech-role">Frontend PWA</div>
+      </div>
+      <div class="tech">
+        <div class="tech-icon">🐳</div>
+        <div class="tech-name">Docker</div>
+        <div class="tech-role">Deploy</div>
+      </div>
+      <div class="tech">
+        <div class="tech-icon">🤖</div>
+        <div class="tech-name">Claude Haiku</div>
+        <div class="tech-role">IA (ARIA)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VIDEO DEMO -->
+<div class="video-section" id="demo">
+  <div class="section-eyebrow">Demo</div>
+  <h2 class="section-title">Veja funcionando</h2>
+  <p class="section-sub">Teste o demo interativo no celular acima ou assista o walkthrough completo do sistema.</p>
+
+  <div class="video-placeholder">
+    <button class="play-btn" onclick="alert('🎬 Grave o vídeo com o OBS Studio ou Loom!\n\nRoteiro sugerido:\n1. Login com PIN (João P. / 1234)\n2. Dashboard com alertas\n3. Coletor: escaneia QR + registra entrada\n4. Estoque: mostra barra de progresso\n5. ARIA: pergunta o que repor\n6. Etiqueta: gera e imprime\n\nFerramentas gratuitas: OBS Studio (PC) ou Screen Recorder (Android)')">
+      ▶
+    </button>
+    <div class="video-title">Vídeo demo em produção</div>
+    <div class="video-sub">
+      O vídeo está sendo gravado com roteiro completo do sistema. 
+      Enquanto isso, teste o demo ao vivo no celular acima — 
+      é o sistema real rodando.
+    </div>
+    <div class="video-steps">
+      <div class="vstep">⏱ <strong>0:00</strong> Login com PIN</div>
+      <div class="vstep">⏱ <strong>0:20</strong> Dashboard + alertas</div>
+      <div class="vstep">⏱ <strong>0:45</strong> Escanear QR + registrar</div>
+      <div class="vstep">⏱ <strong>1:10</strong> ARIA responde em IA</div>
+      <div class="vstep">⏱ <strong>1:30</strong> Gerar etiqueta QR</div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA FINAL -->
+<div class="cta-final">
+  <h2>Pronto pra digitalizar<br/>seu almoxarifado?</h2>
+  <p>Open source, gratuito, roda no seu servidor em minutos.</p>
+  <div class="cta-buttons">
+    <a href="https://github.com/RobsonViieira/Logistica" target="_blank" class="btn-primary" style="font-size:15px;padding:16px 32px">
+      📦 Ver no GitHub
+    </a>
+    <a href="https://github.com/RobsonViieira/Logistica/releases" target="_blank" class="btn-secondary" style="font-size:15px;padding:16px 32px">
+      ⬇️ Download v2.0
+    </a>
+  </div>
+
+  <div class="code-block">
+    <span class="c"># Instale em 3 comandos</span><br/>
+    <span class="o">$</span> git clone https://github.com/RobsonViieira/Logistica.git<br/>
+    <span class="o">$</span> cd Logistica<br/>
+    <span class="o">$</span> docker compose up -d
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">📦 SLR v2.0</span>
+  <span>Feito com ❤️ em Itatiba, SP — Brasil 🇧🇷</span>
+  <a href="https://github.com/RobsonViieira/Logistica" target="_blank" style="color:#94a3b8;text-decoration:none">GitHub →</a>
+</footer>
+
+<script>
+const PRODUTOS = {
+  CAB001:{nome:"Cabo Elétrico 1.5mm",  cat:"Elétrico",   qtd:250, min:100, loc:"RA-P1-N1", un:"M"},
+  CAB002:{nome:"Cabo Elétrico 2.5mm",  cat:"Elétrico",   qtd:60,  min:80,  loc:"RA-P1-N2", un:"M"},
+  CON001:{nome:"Conector RJ45",         cat:"Rede",       qtd:15,  min:50,  loc:"RA-P2-N1", un:"UN"},
+  PAR001:{nome:"Parafuso M6x20",        cat:"Fixação",    qtd:25,  min:10,  loc:"RB-P1-N1", un:"CX"},
+  OLE001:{nome:"Óleo Lubrificante",     cat:"Manutenção", qtd:5,   min:20,  loc:"RB-P2-N1", un:"L"},
+  EPI001:{nome:"Luva Nitrílica M",      cat:"EPI",        qtd:12,  min:30,  loc:"RC-P1-N1", un:"PAR"},
+  EPI002:{nome:"Óculos de Segurança",   cat:"EPI",        qtd:20,  min:15,  loc:"RC-P1-N2", un:"UN"},
+  ROL001:{nome:"Rolamento 6205",        cat:"Mecânico",   qtd:2,   min:5,   loc:"RC-P2-N1", un:"UN"},
+  FUS001:{nome:"Fusível 16A",           cat:"Elétrico",   qtd:30,  min:25,  loc:"RD-P1-N1", un:"UN"},
+  COR001:{nome:"Correia V A42",         cat:"Mecânico",   qtd:1,   min:3,   loc:"RD-P1-N2", un:"UN"},
+};
+
+function setCode(c){
+  document.getElementById('demoInput').value=c;
+  buscarProduto();
+}
+
+function buscarProduto(){
+  const cod = document.getElementById('demoInput').value.trim().toUpperCase();
+  const p = PRODUTOS[cod];
+  const res = document.getElementById('demoResult');
+
+  if(!p){
+    res.classList.remove('show');
+    const inp = document.getElementById('demoInput');
+    inp.style.borderColor='#ef4444';
+    setTimeout(()=>inp.style.borderColor='',1000);
+    return;
+  }
+
+  const pct = Math.min(100, Math.round((p.qtd/p.min)*100));
+  const critico = p.qtd <= p.min;
+  const barColor = pct<=30?'#ef4444':pct<=70?'#fbbf24':'#22c55e';
+
+  document.getElementById('resNome').textContent = p.nome;
+  document.getElementById('resSub').textContent  = `${cod} · 📍 ${p.loc} · ${p.cat}`;
+  document.getElementById('resQtd').textContent  = `${p.qtd} ${p.un}`;
+  document.getElementById('resQtd').style.color  = critico?'#f87171':'#22c55e';
+
+  const badge = document.getElementById('resBadge');
+  badge.textContent = critico?'⚠️ CRÍTICO':'✅ OK';
+  badge.style.background = critico?'#ef444422':'#22c55e22';
+  badge.style.color = critico?'#f87171':'#22c55e';
+
+  document.getElementById('resBar').style.width  = pct+'%';
+  document.getElementById('resBar').style.background = barColor;
+  document.getElementById('resPct').textContent  = pct+'% do mínimo';
+
+  res.classList.add('show');
+}
+
+// Animação dos contadores no hero
+const counters = document.querySelectorAll('.stat-num');
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting && e.target.textContent==='0'){
+      let n=0; const t=setInterval(()=>{ n++; e.target.textContent=n; if(n>=10)clearInterval(t);},80);
+    }
+  });
+});
+counters.forEach(c=>observer.observe(c));
+</script>
+</body>
+</html>
