@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Previne zoom em inputs no iOS */
+input, select, textarea {
+  font-size: 16px;
+}
+
+/* Scrollbar fina */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+/* PWA safe areas */
+body {
+  padding-bottom: env(safe-area-inset-bottom);
+}
