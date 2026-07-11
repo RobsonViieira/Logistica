@@ -1,5 +1,7 @@
 <div align="center">
 
+[![Demo](https://img.shields.io/badge/🌐_Demo-GitHub_Pages-orange)](https://robsonviieira.github.io/Logistica/) [![Releases](https://img.shields.io/github/v/release/RobsonViieira/Logistica)](https://github.com/RobsonViieira/Logistica/releases)
+
 # 📦 SLR — Software de Logística Rovie
 
 ### *O almoxarifado do futuro, no celular que você já tem*
